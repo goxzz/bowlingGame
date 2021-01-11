@@ -1,4 +1,4 @@
-package com.bowling.game;
+package com.bowling.interfaces;
 
 import java.util.Map;
 

@@ -1,16 +1,19 @@
 package com.bowling.game;
 
-public class Player {
+import com.bowling.interfaces.Player;
+import com.bowling.interfaces.Scoreable;
+
+public class BowlingPlayer implements Player{
 	
 	private String name;
-	private Scoreboard scoreboard;
+	private Scoreable scoreboard;
 	private int score;
 	private int tryNumber;
 	private int remainingShots;
 	private int roundsPlayed;
 	private Boolean isActive;
 	
-	public Player(final String name) {
+	public BowlingPlayer(final String name) {
 		this.name = name;
 		this.scoreboard = new Scoreboard();
 		this.score = 0;
@@ -28,12 +31,12 @@ public class Player {
 		this.name = name;
 	}
 
-	public Scoreboard setScoreboard() {
+	public Scoreable setScoreboard() {
 		return scoreboard;
 	}
 
-	public void getScoreboard(final Scoreboard pinfall) {
-		this.scoreboard = pinfall;
+	public void getScoreboard(final Scoreable scoreboard) {
+		this.scoreboard = scoreboard;
 	}
 
 	public int getScore() {

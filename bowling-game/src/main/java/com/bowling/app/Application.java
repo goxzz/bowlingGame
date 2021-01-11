@@ -1,4 +1,7 @@
-package com.bowling.game;
+package com.bowling.app;
+
+import com.bowling.game.PlayableFactory;
+import com.bowling.interfaces.Playable;
 
 public class Application {
 

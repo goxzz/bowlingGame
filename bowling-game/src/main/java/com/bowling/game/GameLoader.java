@@ -7,6 +7,9 @@ import java.util.Map;
 import java.util.Scanner;
 import java.util.logging.Logger;
 
+import com.bowling.app.Constants;
+import com.bowling.interfaces.Player;
+
 public class GameLoader {
 	
 	private static Logger log = Logger.getLogger("com.bowling.game.PlayerLoader");
@@ -46,7 +49,7 @@ public class GameLoader {
 				validatePlayerTurnHasEnded(currentPlayer, nextPlayerName, readedLine);
 				
 				if(playersMap.isEmpty() || !playersMap.containsKey(nextPlayerName)) {
-					currentPlayer = new Player(nextPlayerName);
+					currentPlayer = new BowlingPlayer(nextPlayerName);
 				} else {
 					currentPlayer = playersMap.get(nextPlayerName);
 					if(currentPlayer.getRoundsPlayed() > 9) {
@@ -86,7 +89,7 @@ public class GameLoader {
 			return 0;
 		}
 		
-		if ("F".equals(score)) {
+		if (Constants.FOUL_POINT.equals(score)) {
 			return 0;
 		} else {
 			try {

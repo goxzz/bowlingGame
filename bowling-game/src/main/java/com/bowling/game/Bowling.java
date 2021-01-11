@@ -4,6 +4,9 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import com.bowling.interfaces.Playable;
+import com.bowling.interfaces.Player;
+
 public class Bowling implements Playable {
 	
 	public void startMatch() throws Exception {
@@ -47,8 +50,10 @@ public class Bowling implements Playable {
 					// Calculates the 10th frame score
 					frameScore = get10thFrameScore(currentFrame);
 				}				
-				currentPlayer.setScore(currentPlayer.getScore() + frameScore);
+				//currentPlayer.setScore(currentPlayer.getScore() + frameScore);
+				currentPlayer.addScore(frameScore);
 			}
+			System.out.println(currentPlayer.getName() + " has scored " + currentPlayer.getScore() + " points!");
 			playersMap.put(currentPlayer.getName(), currentPlayer);
 		}
 	}

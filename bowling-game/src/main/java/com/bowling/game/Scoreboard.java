@@ -1,6 +1,8 @@
 package com.bowling.game;
 
-public class Scoreboard {
+import com.bowling.interfaces.Scoreable;
+
+public class Scoreboard implements Scoreable{
 	
 	private int[][] frame;
 	private int[] frameScore;
