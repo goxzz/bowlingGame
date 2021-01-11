@@ -1,5 +1,6 @@
 package com.bowling.game;
 
+import java.util.Collection;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -24,6 +25,7 @@ public class Bowling implements Playable {
 		if(playersMap.isEmpty()) {
 			System.out.println("The system coulnd't load any players.");
 		} else {
+			checkIfAllPlayersFinished(playersMap.values());
 			calculateScore(playersMap);
 		}
 	}
@@ -35,7 +37,7 @@ public class Bowling implements Playable {
 		
 		for(Entry<String, Player> entry : playersMap.entrySet()) {
 			currentPlayer = entry.getValue();
-			currentFrame = currentPlayer.getPinfall().getFrame();
+			currentFrame = currentPlayer.setScoreboard().getFrame();
 			
 			for(int i = 0; i <= 9; i++) {
 				// Calculates the first 9 frames score
@@ -49,8 +51,6 @@ public class Bowling implements Playable {
 			}
 			playersMap.put(currentPlayer.getName(), currentPlayer);
 		}
-		
-		playersMap.values().forEach(p -> System.out.println(p.getName() + " has scored " + p.getScore() + " points!"));
 	}
 
 	public void showResults(Map<String, Player> playersMap) {
@@ -65,7 +65,7 @@ public class Bowling implements Playable {
 			, final int[][] currentFrame, final int i) {
 		
 		if(currentFrame[i][0] == 10) {
-			if (currentPlayer.getPinfall().getFrame()[i+1][0] == 10) {
+			if (currentPlayer.setScoreboard().getFrame()[i+1][0] == 10) {
 				if(i < 8) {
 					return 20 + currentFrame[i+2][0];
 				} else {
@@ -89,6 +89,12 @@ public class Bowling implements Playable {
 			return 10 + currentFrame[9][2];
 		} else {
 			return currentFrame[9][0] + currentFrame[9][1];
+		}
+	}
+	
+	public void checkIfAllPlayersFinished(Collection<Player> playersSet) throws Exception {
+		if (playersSet.stream().filter(p -> p.getRoundsPlayed() < 9).count() > 0) {
+			throw new Exception("All the players need to finish the match!");
 		}
 	}
 

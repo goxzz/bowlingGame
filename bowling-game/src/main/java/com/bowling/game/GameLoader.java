@@ -120,7 +120,7 @@ public class GameLoader {
 	
 	public void updatePlayer(Player currentPlayer, int nextPlayerScore) {
 		
-		currentPlayer.getPinfall().loadFrame(
+		currentPlayer.setScoreboard().loadFrame(
 				currentPlayer.getTryNumber(), currentPlayer.getRoundsPlayed(), nextPlayerScore);
 		
 		// Determine the remaining shots for the player in this round
@@ -133,8 +133,8 @@ public class GameLoader {
 			if (nextPlayerScore == 10 && currentPlayer.getTryNumber() == 0) {
 				
 				currentPlayer.setRemainingShots(2);
-			} else if(currentPlayer.getTryNumber() == 1 && currentPlayer.getPinfall().getFrame()[9][0]
-					+ currentPlayer.getPinfall().getFrame()[9][1] == 10) {
+			} else if(currentPlayer.getTryNumber() == 1 && currentPlayer.setScoreboard().getFrame()[9][0]
+					+ currentPlayer.setScoreboard().getFrame()[9][1] == 10) {
 				
 				currentPlayer.setRemainingShots(1);
 			}

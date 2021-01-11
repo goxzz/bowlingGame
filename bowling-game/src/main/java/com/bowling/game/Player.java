@@ -28,7 +28,7 @@ public class Player {
 		this.name = name;
 	}
 
-	public Scoreboard getPinfall() {
+	public Scoreboard setScoreboard() {
 		return scoreboard;
 	}
 
