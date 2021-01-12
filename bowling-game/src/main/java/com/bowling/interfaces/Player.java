@@ -6,9 +6,9 @@ public interface Player {
 
 	public void setName(final String name);
 
-	public Scoreable setScoreboard();
+	public Scoreable getScoreboard();
 
-	public void getScoreboard(final Scoreable scoreboard);
+	public void setScoreboard(final Scoreable scoreboard);
 
 	public int getScore();
 

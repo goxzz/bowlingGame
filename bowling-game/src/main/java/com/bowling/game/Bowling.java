@@ -3,7 +3,9 @@ package com.bowling.game;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.atomic.AtomicReference;
 
+import com.bowling.interfaces.Loadable;
 import com.bowling.interfaces.Playable;
 import com.bowling.interfaces.Player;
 
@@ -22,7 +24,7 @@ public class Bowling implements Playable {
 				"________/___/________________________________-=______\\__/______\\\\\\/\n" + 
 				"");
 		
-		GameLoader gl = new GameLoader();
+		Loadable gl = new GameLoader();
 		Map<String, Player> playersMap = gl.loadPlayersData("");
 		
 		if(playersMap.isEmpty()) {
@@ -30,17 +32,19 @@ public class Bowling implements Playable {
 		} else {
 			checkIfAllPlayersFinished(playersMap.values());
 			calculateScore(playersMap);
+			showResults(playersMap);
+			endMatch();
 		}
 	}
 
 	public void calculateScore(Map<String, Player> playersMap) {
 		Player currentPlayer;
-		int[][] currentFrame;
+		Integer[][] currentFrame;
 		int frameScore = 0;
 		
 		for(Entry<String, Player> entry : playersMap.entrySet()) {
 			currentPlayer = entry.getValue();
-			currentFrame = currentPlayer.setScoreboard().getFrame();
+			currentFrame = currentPlayer.getScoreboard().getFrame();
 			
 			for(int i = 0; i <= 9; i++) {
 				// Calculates the first 9 frames score
@@ -50,27 +54,75 @@ public class Bowling implements Playable {
 					// Calculates the 10th frame score
 					frameScore = get10thFrameScore(currentFrame);
 				}				
-				//currentPlayer.setScore(currentPlayer.getScore() + frameScore);
+				currentPlayer.getScoreboard().setFrameScore(frameScore, i);
 				currentPlayer.addScore(frameScore);
 			}
-			System.out.println(currentPlayer.getName() + " has scored " + currentPlayer.getScore() + " points!");
 			playersMap.put(currentPlayer.getName(), currentPlayer);
 		}
 	}
 
 	public void showResults(Map<String, Player> playersMap) {
+		String frame = "Frame		1		2		3		4		5		"
+						+ "6		7		8		9		10";
+		String frameDivider = "\n---------------------------------"
+				+ "-----------------------------------------------"
+				+ "-----------------------------------------------"
+				+ "-----------------------------------------------------";
+		AtomicReference<String> display = new AtomicReference<>("");
 		
+		playersMap.values().stream().forEach((p) -> {
+			display.set(display.get() + frameDivider + "\n" + p.getName() + frameDivider + "\nPinfalls  ");
+			Integer[][] currentPlayerFrames = p.getScoreboard().getFrame();
+			Integer[] framescore = p.getScoreboard().getFrameScore();
+			String score = "Score";
+			for(int i = 0; i <= 9; i ++) {
+				for(int j = 0; j < 2; j++ ) {
+				
+					if (j == 0 && currentPlayerFrames[i][j] == 10 && i < 9) {
+						display.set(display.get() + "		X");
+						break;
+					} else if(j == 0 && currentPlayerFrames[i][j] == 10 && i == 9) {
+						display.set(display.get() + "	X");
+					} else if (j == 1 && currentPlayerFrames[i][j] == 10 && i == 9 && currentPlayerFrames[i][j-1] == 10) {
+						display.set(display.get() + "	X");
+					} else if(j == 0
+							&& currentPlayerFrames[i][j] + currentPlayerFrames[i][j+1] == 10) {
+						display.set(display.get() + "	" + currentPlayerFrames[i][j] + "	/");
+						break;
+					} else {
+						display.set(display.get() + "	" + currentPlayerFrames[i][j]);
+					}	
+				}
+				
+				if (i == 9 && currentPlayerFrames[i][2] != null) {
+					if (currentPlayerFrames[i][2] == 10) {
+						display.set(display.get() + "	X");
+					} else if (currentPlayerFrames[i][0] + currentPlayerFrames[i][1] != 20
+							&& currentPlayerFrames[i][1] + currentPlayerFrames[i][2] == 10 ) {
+						display.set(display.get() +  "	/");
+					} else {
+						display.set(display.get() + "	" + currentPlayerFrames[i][2]);
+					}
+					
+				}	
+				score +=  "		" + framescore[i];
+			}
+			display.set(display.get() + "\n" + score);
+		});
+		
+		display.set(frame + display.get());
+		System.out.println(display);
 	}
 
 	public void endMatch() {
-		
+		System.out.println("\nThanks for playing!");
 	}
 	
 	public int getFirstFramesScore(final Player currentPlayer
-			, final int[][] currentFrame, final int i) {
+			, final Integer[][] currentFrame, final int i) {
 		
 		if(currentFrame[i][0] == 10) {
-			if (currentPlayer.setScoreboard().getFrame()[i+1][0] == 10) {
+			if (currentPlayer.getScoreboard().getFrame()[i+1][0] == 10) {
 				if(i < 8) {
 					return 20 + currentFrame[i+2][0];
 				} else {
@@ -86,7 +138,7 @@ public class Bowling implements Playable {
 		}
 	}
 	
-	public int get10thFrameScore(final int[][] currentFrame) {
+	public int get10thFrameScore(final Integer[][] currentFrame) {
 		
 		if(currentFrame[9][0] == 10) {
 			return 10 + currentFrame[9][1] + currentFrame[9][2];

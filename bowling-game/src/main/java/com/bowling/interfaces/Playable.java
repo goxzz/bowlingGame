@@ -8,6 +8,8 @@ public interface Playable {
 	
 	public void calculateScore(Map<String, Player> playersMap);
 	
+	//public void generateScoreboard(Map<String, Player> playersMap);
+	
 	public void showResults(Map<String, Player> playersMap);
 	
 	public void endMatch();

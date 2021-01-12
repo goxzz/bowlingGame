@@ -31,11 +31,11 @@ public class BowlingPlayer implements Player{
 		this.name = name;
 	}
 
-	public Scoreable setScoreboard() {
+	public Scoreable getScoreboard() {
 		return scoreboard;
 	}
 
-	public void getScoreboard(final Scoreable scoreboard) {
+	public void setScoreboard(final Scoreable scoreboard) {
 		this.scoreboard = scoreboard;
 	}
 

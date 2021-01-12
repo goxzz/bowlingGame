@@ -2,13 +2,13 @@ package com.bowling.interfaces;
 
 public interface Scoreable {
 
-	public int[][] getFrame();
+	public Integer[][] getFrame();
 
-	public void setFrame(final int[][] frame);
+	public void setFrame(final Integer[][] frame);
 
-	public int[] getFrameScore();
+	public Integer[] getFrameScore();
 
-	public void setFrameScore(final int[] frameScore);
+	public void setFrameScore(final Integer frameScore, final int index);
 	
 	public void loadFrame(final int tryNumber,final int roundNumber, final int score);
 }

@@ -8,9 +8,10 @@ import java.util.Scanner;
 import java.util.logging.Logger;
 
 import com.bowling.app.Constants;
+import com.bowling.interfaces.Loadable;
 import com.bowling.interfaces.Player;
 
-public class GameLoader {
+public class GameLoader implements Loadable{
 	
 	private static Logger log = Logger.getLogger("com.bowling.game.PlayerLoader");
 	
@@ -33,6 +34,8 @@ public class GameLoader {
 		
 		try (Scanner sc = new Scanner(input);) {
 			
+			System.out.println("Loading game...");
+			
 			while(sc.hasNextLine()) {
 				readedLine++;
 				lineData = sc.nextLine().split("\\s+");
@@ -46,7 +49,7 @@ public class GameLoader {
 				nextPlayerName = parsePlayerName(lineData[0]);
 				nextPlayerScore = parsePlayerScore(lineData[1]);
 				
-				validatePlayerTurnHasEnded(currentPlayer, nextPlayerName, readedLine);
+				validatePlayerTurnIsLoaded(currentPlayer, nextPlayerName, readedLine);
 				
 				if(playersMap.isEmpty() || !playersMap.containsKey(nextPlayerName)) {
 					currentPlayer = new BowlingPlayer(nextPlayerName);
@@ -57,7 +60,7 @@ public class GameLoader {
 					}
 				}
 				
-				updatePlayer(currentPlayer, nextPlayerScore);
+				updatePlayerInfo(currentPlayer, nextPlayerScore);
 				
 				playersMap.put(nextPlayerName, currentPlayer);
 				
@@ -107,7 +110,7 @@ public class GameLoader {
 		return 0;
 	}
 	
-	public void validatePlayerTurnHasEnded(final Player currentPlayer
+	public void validatePlayerTurnIsLoaded(final Player currentPlayer
 			, final String nextPlayerName
 			, final int readedLine) {
 		if(currentPlayer != null) {
@@ -121,9 +124,9 @@ public class GameLoader {
 		}
 	}
 	
-	public void updatePlayer(Player currentPlayer, int nextPlayerScore) {
+	public void updatePlayerInfo(Player currentPlayer, int nextPlayerScore) {
 		
-		currentPlayer.setScoreboard().loadFrame(
+		currentPlayer.getScoreboard().loadFrame(
 				currentPlayer.getTryNumber(), currentPlayer.getRoundsPlayed(), nextPlayerScore);
 		
 		// Determine the remaining shots for the player in this round
@@ -136,8 +139,8 @@ public class GameLoader {
 			if (nextPlayerScore == 10 && currentPlayer.getTryNumber() == 0) {
 				
 				currentPlayer.setRemainingShots(2);
-			} else if(currentPlayer.getTryNumber() == 1 && currentPlayer.setScoreboard().getFrame()[9][0]
-					+ currentPlayer.setScoreboard().getFrame()[9][1] == 10) {
+			} else if(currentPlayer.getTryNumber() == 1 && currentPlayer.getScoreboard().getFrame()[9][0]
+					+ currentPlayer.getScoreboard().getFrame()[9][1] == 10) {
 				
 				currentPlayer.setRemainingShots(1);
 			}
