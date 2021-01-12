@@ -4,13 +4,11 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
-import com.bowling.game.PlayerTurnHasNotEndedExeption;
-
 public interface Playable {
 	
 	public void startMatch() throws Exception;
 	
-	public void checkIfAllPlayersFinished(Collection<Player> playersSet) throws PlayerTurnHasNotEndedExeption;
+	public Boolean checkIfAllPlayersFinished(Collection<Player> playersSet);
 	
 	public void calculateScore(Map<String, Player> playersMap);
 	

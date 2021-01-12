@@ -7,13 +7,13 @@ public interface Loadable {
 
 	public Map<String,Player> loadPlayersData(final String path) throws FileNotFoundException;
 	
-	public String parsePlayerName(final String playerName, int readedline);
+	public String parsePlayerName(final String playerName, int readedLine);
 	
-	public int parsePlayerScore(final String score, int readedline);
+	public int parsePlayerScore(final String score, final int readedLine);
 	
 	public void validatePlayerTurnIsLoaded(final Player currentPlayer
 			, final String nextPlayerName
 			, final int readedLine);
 	
-	public void updatePlayerInfo(Player currentPlayer, int nextPlayerScore);
+	public void updatePlayerInfo(Player currentPlayer, int nextPlayerScore, final int readedLine);
 }

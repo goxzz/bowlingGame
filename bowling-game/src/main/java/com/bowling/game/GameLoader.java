@@ -9,6 +9,9 @@ import java.util.logging.Logger;
 import org.apache.commons.lang3.math.NumberUtils;
 
 import com.bowling.app.Constants;
+import com.bowling.exception.InvalidFileFormatException;
+import com.bowling.exception.PlayerTurnHasEndedExeption;
+import com.bowling.exception.PlayerTurnHasNotEndedExeption;
 import com.bowling.interfaces.Loadable;
 import com.bowling.interfaces.Player;
 
@@ -48,9 +51,8 @@ public class GameLoader implements Loadable{
 				}
 				
 				lineData = nextLine.split("\\s+");
-				
 				if(lineData.length > 2) {
-					System.out.println("The frame has more than the two admited values");
+					throw new InvalidFileFormatException("The frame has more than the two admited values");
 				}
 				
 				nextPlayerName = parsePlayerName(lineData[0], readedLine);
@@ -63,11 +65,12 @@ public class GameLoader implements Loadable{
 				} else {
 					currentPlayer = playersMap.get(nextPlayerName);
 					if(currentPlayer.getRoundsPlayed() > 9) {
-						System.out.println("The player " + currentPlayer.getName() + " has played more than 10 rounds!");
+						throw new InvalidFileFormatException(
+								"The player " + currentPlayer.getName() + " has played more than 10 rounds!");
 					}
 				}
 				
-				updatePlayerInfo(currentPlayer, nextPlayerScore);
+				updatePlayerInfo(currentPlayer, nextPlayerScore, readedLine);
 				
 				playersMap.put(nextPlayerName, currentPlayer);
 				
@@ -82,7 +85,7 @@ public class GameLoader implements Loadable{
 		
 		String name = "";
 		
-		if (playerName.isEmpty()) {
+		if (playerName.trim().isEmpty()) {
 			throw new IllegalArgumentException(
 					"The player name at line " + readedLine + " cannot be empty");
 		} else {
@@ -92,14 +95,12 @@ public class GameLoader implements Loadable{
 		return name;
 	}
 	
-	public int parsePlayerScore(final String score, final int readedline) {
-		
-		if(score.isEmpty()) {
+	public int parsePlayerScore(final String score, final int readedLine) {
+
+		if(score.trim().isEmpty()) {
 			throw new IllegalArgumentException(
-					"The player score at line " + readedline + " cannot be empty");
-		}
-		
-		if (Constants.FOUL_POINT.equals(score)) {
+					"The player score at line " + readedLine + " cannot be empty");
+		} else if (Constants.FOUL_POINT.equals(score)) {
 			return 0;
 		} else if (NumberUtils.isDigits(score)){
 			int frameScore = Integer.parseInt(score);
@@ -109,7 +110,7 @@ public class GameLoader implements Loadable{
 		} 
 		
 		throw new NumberFormatException(
-				score + " at line " + readedline + " is not a valid score");
+				score + " at line " + readedLine + " is not a valid score");
 	}
 	
 	public void validatePlayerTurnIsLoaded(final Player currentPlayer
@@ -117,16 +118,23 @@ public class GameLoader implements Loadable{
 			, final int readedLine) {
 		if(currentPlayer != null) {
 			if(currentPlayer.getIsActive() && !nextPlayerName.equals(currentPlayer.getName())) {
-				System.out.println("The turn of " + currentPlayer.getName() 
-					+ " at line " + readedLine + " hasn't ended!");
+				
+				throw new PlayerTurnHasNotEndedExeption("The turn of " + currentPlayer.getName() 
+													+ " at line " + readedLine + " hasn't ended!");
+				
 			} else if(!currentPlayer.getIsActive() && nextPlayerName.equals(currentPlayer.getName())) {
-				System.out.println("The turn of " + currentPlayer.getName() 
-					+ " at line " + readedLine + " has ended!");
+				
+				throw new PlayerTurnHasEndedExeption("The turn of " + currentPlayer.getName() 
+													+ " at line " + readedLine + " has ended!");
 			}
 		}
 	}
 	
-	public void updatePlayerInfo(Player currentPlayer, int nextPlayerScore) {
+	public void updatePlayerInfo(Player currentPlayer, final int nextPlayerScore, final int readedLine) {
+		
+		if(currentPlayer.getTryNumber() > 0) {
+			checkScoreIsValid(currentPlayer, nextPlayerScore, readedLine);
+		}
 		
 		currentPlayer.getScoreboard().loadFrame(
 				currentPlayer.getTryNumber(), currentPlayer.getRoundsPlayed(), nextPlayerScore);
@@ -158,6 +166,23 @@ public class GameLoader implements Loadable{
 			currentPlayer.setIsActive(true);
 			currentPlayer.setTryNumber(currentPlayer.getTryNumber()+1);
 			currentPlayer.setRemainingShots(currentPlayer.getRemainingShots()-1);
+		}
+	}
+	
+	public void checkScoreIsValid(final Player currentPlayer, final int nextPlayerScore, final int readedLine) {
+		int tryNumber = currentPlayer.getTryNumber();
+		int roundNumber = currentPlayer.getRoundsPlayed();
+		
+		if (tryNumber > 0 && currentPlayer.getScoreboard().getFrame()[roundNumber][tryNumber-1] != null
+				&& (roundNumber < 9 && currentPlayer.getScoreboard().getFrame()[roundNumber][tryNumber-1]
+						+ nextPlayerScore > 10)
+				||  (roundNumber == 9 && currentPlayer.getScoreboard().getFrame()[roundNumber][tryNumber-1] != 10
+						&& currentPlayer.getScoreboard().getFrame()[roundNumber][tryNumber-1]
+								+ nextPlayerScore > 10
+						)
+				) {
+			throw new ScoreLimitReachedException("The score " + nextPlayerScore + " at line " + readedLine
+					+ " exceeds the score limit");
 		}
 	}
 	

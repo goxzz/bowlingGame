@@ -6,6 +6,7 @@ import java.util.Map.Entry;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Logger;
 
+import com.bowling.exception.PlayerTurnHasNotEndedExeption;
 import com.bowling.interfaces.Loadable;
 import com.bowling.interfaces.Playable;
 import com.bowling.interfaces.Player;
@@ -33,8 +34,7 @@ public class Bowling implements Playable {
 		
 		if(playersMap.isEmpty()) {
 			System.out.println("The system coulnd't load any players.");
-		} else {
-			checkIfAllPlayersFinished(playersMap.values());
+		} else if(checkIfAllPlayersFinished(playersMap.values())) {
 			calculateScore(playersMap);
 			showResults(playersMap);
 			endMatch();
@@ -51,11 +51,9 @@ public class Bowling implements Playable {
 			currentFrame = currentPlayer.getScoreboard().getFrame();
 			
 			for(int i = 0; i <= 9; i++) {
-				// Calculates the first 9 frames score
 				if(i < 9) {
 					frameScore = getFirstFramesScore(currentPlayer, currentFrame, i);
 				} else {
-					// Calculates the 10th frame score
 					frameScore = get10thFrameScore(currentFrame);
 				}				
 				currentPlayer.getScoreboard().setFrameScore(frameScore, i);
@@ -95,9 +93,9 @@ public class Bowling implements Playable {
 	
 	public int get10thFrameScore(final Integer[][] currentFrame) {
 		
-		if(currentFrame[9][0] == 10) {
+		if(currentFrame[9][0] == 10 && currentFrame[9][2] != null) {
 			return 10 + currentFrame[9][1] + currentFrame[9][2];
-		} else if (currentFrame[9][0] + currentFrame[9][1] == 10) {
+		} else if (currentFrame[9][0] + currentFrame[9][1] == 10 && currentFrame[9][2] != null) {
 			return 10 + currentFrame[9][2];
 		} else {
 			return currentFrame[9][0] + currentFrame[9][1];
@@ -107,7 +105,7 @@ public class Bowling implements Playable {
 	public void getFirstFramesScoreboard(final Integer[][] currentPlayerFrames
 			, final int i, AtomicReference<String> display) {
 		
-		for (int j = 0; j < 2; j++ ) {
+		for (int j = 0; j < 2; j++) {
 			if (j == 0 && currentPlayerFrames[i][j] == 10 && i < 9) {
 				display.set(display.get() + "		X");
 				break;
@@ -132,7 +130,8 @@ public class Bowling implements Playable {
 			if (currentPlayerFrames[i][2] == 10) {
 				display.set(display.get() + "	X");
 			} else if (currentPlayerFrames[i][0] + currentPlayerFrames[i][1] != 20
-					&& currentPlayerFrames[i][1] + currentPlayerFrames[i][2] == 10 ) {
+					&& currentPlayerFrames[i][0] + currentPlayerFrames[i][1] != 10
+					&& currentPlayerFrames[i][1] + currentPlayerFrames[i][2] == 10) {
 				display.set(display.get() +  "	/");
 			} else {
 				display.set(display.get() + "	" + currentPlayerFrames[i][2]);
@@ -141,11 +140,14 @@ public class Bowling implements Playable {
 		}
 	}
 	
-	public void checkIfAllPlayersFinished(Collection<Player> playersSet) throws PlayerTurnHasNotEndedExeption {
-		if (playersSet.stream().filter(p -> p.getRoundsPlayed() < 9).count() > 0) {
-			throw new PlayerTurnHasNotEndedExeption(
-					"All the players need to finish the match!");
+	public Boolean checkIfAllPlayersFinished(Collection<Player> playersSet) {
+		
+		
+		if (playersSet.stream().filter(p -> p.getRoundsPlayed() < 9 
+				|| p.getIsActive()).count() == 0) {
+			return true;
 		}
+		throw new PlayerTurnHasNotEndedExeption("All the players need to finish the match!");
 	}
 
 	public AtomicReference<String> generateScoreboard(Map<String, Player> playersMap) {
