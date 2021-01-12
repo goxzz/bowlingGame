@@ -4,12 +4,16 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.logging.Logger;
 
 import com.bowling.interfaces.Loadable;
 import com.bowling.interfaces.Playable;
 import com.bowling.interfaces.Player;
 
 public class Bowling implements Playable {
+	
+	@SuppressWarnings("unused")
+	private static Logger log = Logger.getLogger("com.bowling.game.Bowling");
 	
 	public void startMatch() throws Exception {
 		System.out.println("Welcome to the bowling game!");
@@ -62,56 +66,7 @@ public class Bowling implements Playable {
 	}
 
 	public void showResults(Map<String, Player> playersMap) {
-		String frame = "Frame		1		2		3		4		5		"
-						+ "6		7		8		9		10";
-		String frameDivider = "\n---------------------------------"
-				+ "-----------------------------------------------"
-				+ "-----------------------------------------------"
-				+ "-----------------------------------------------------";
-		AtomicReference<String> display = new AtomicReference<>("");
-		
-		playersMap.values().stream().forEach((p) -> {
-			display.set(display.get() + frameDivider + "\n" + p.getName() + frameDivider + "\nPinfalls  ");
-			Integer[][] currentPlayerFrames = p.getScoreboard().getFrame();
-			Integer[] framescore = p.getScoreboard().getFrameScore();
-			String score = "Score";
-			for(int i = 0; i <= 9; i ++) {
-				for(int j = 0; j < 2; j++ ) {
-				
-					if (j == 0 && currentPlayerFrames[i][j] == 10 && i < 9) {
-						display.set(display.get() + "		X");
-						break;
-					} else if(j == 0 && currentPlayerFrames[i][j] == 10 && i == 9) {
-						display.set(display.get() + "	X");
-					} else if (j == 1 && currentPlayerFrames[i][j] == 10 && i == 9 && currentPlayerFrames[i][j-1] == 10) {
-						display.set(display.get() + "	X");
-					} else if(j == 0
-							&& currentPlayerFrames[i][j] + currentPlayerFrames[i][j+1] == 10) {
-						display.set(display.get() + "	" + currentPlayerFrames[i][j] + "	/");
-						break;
-					} else {
-						display.set(display.get() + "	" + currentPlayerFrames[i][j]);
-					}	
-				}
-				
-				if (i == 9 && currentPlayerFrames[i][2] != null) {
-					if (currentPlayerFrames[i][2] == 10) {
-						display.set(display.get() + "	X");
-					} else if (currentPlayerFrames[i][0] + currentPlayerFrames[i][1] != 20
-							&& currentPlayerFrames[i][1] + currentPlayerFrames[i][2] == 10 ) {
-						display.set(display.get() +  "	/");
-					} else {
-						display.set(display.get() + "	" + currentPlayerFrames[i][2]);
-					}
-					
-				}	
-				score +=  "		" + framescore[i];
-			}
-			display.set(display.get() + "\n" + score);
-		});
-		
-		display.set(frame + display.get());
-		System.out.println(display);
+		System.out.println(generateScoreboard(playersMap));
 	}
 
 	public void endMatch() {
@@ -149,10 +104,78 @@ public class Bowling implements Playable {
 		}
 	}
 	
-	public void checkIfAllPlayersFinished(Collection<Player> playersSet) throws Exception {
-		if (playersSet.stream().filter(p -> p.getRoundsPlayed() < 9).count() > 0) {
-			throw new Exception("All the players need to finish the match!");
+	public void getFirstFramesScoreboard(final Integer[][] currentPlayerFrames
+			, final int i, AtomicReference<String> display) {
+		
+		for (int j = 0; j < 2; j++ ) {
+			if (j == 0 && currentPlayerFrames[i][j] == 10 && i < 9) {
+				display.set(display.get() + "		X");
+				break;
+			} else if(j == 0 && currentPlayerFrames[i][j] == 10 && i == 9) {
+				display.set(display.get() + "	X");
+			} else if (j == 1 && currentPlayerFrames[i][j] == 10 && i == 9 && currentPlayerFrames[i][j-1] == 10) {
+				display.set(display.get() + "	X");
+			} else if(j == 0 && currentPlayerFrames[i][j] + currentPlayerFrames[i][j+1] == 10) {
+				display.set(display.get() + "	" + currentPlayerFrames[i][j] + "	/");
+				break;
+			} else {
+				display.set(display.get() + "	" + currentPlayerFrames[i][j]);
+			}	
 		}
+		
+	}
+	
+	public void get10thFrameScoreboard(final Integer[][] currentPlayerFrames
+			, AtomicReference<String> display, int i) {
+		
+		if (currentPlayerFrames[i][2] != null) {
+			if (currentPlayerFrames[i][2] == 10) {
+				display.set(display.get() + "	X");
+			} else if (currentPlayerFrames[i][0] + currentPlayerFrames[i][1] != 20
+					&& currentPlayerFrames[i][1] + currentPlayerFrames[i][2] == 10 ) {
+				display.set(display.get() +  "	/");
+			} else {
+				display.set(display.get() + "	" + currentPlayerFrames[i][2]);
+			}
+			
+		}
+	}
+	
+	public void checkIfAllPlayersFinished(Collection<Player> playersSet) throws PlayerTurnHasNotEndedExeption {
+		if (playersSet.stream().filter(p -> p.getRoundsPlayed() < 9).count() > 0) {
+			throw new PlayerTurnHasNotEndedExeption(
+					"All the players need to finish the match!");
+		}
+	}
+
+	public AtomicReference<String> generateScoreboard(Map<String, Player> playersMap) {
+		
+		AtomicReference<String> display = new AtomicReference<>("");
+		String frame = "Frame		1		2		3		4		5		"
+				+ "6		7		8		9		10";
+		String frameDivider = "\n---------------------------------"
+				+ "-----------------------------------------------"
+				+ "-----------------------------------------------"
+				+ "-----------------------------------------------------";
+		
+		playersMap.values().stream().forEach((p) -> {
+			display.set(display.get() + frameDivider + "\n" + p.getName() + frameDivider + "\nPinfalls  ");
+			Integer[][] currentPlayerFrames = p.getScoreboard().getFrame();
+			Integer[] framescore = p.getScoreboard().getFrameScore();
+			String score = "Score";
+			
+			for(int i = 0; i <= 9; i ++) {
+				getFirstFramesScoreboard(currentPlayerFrames, i, display);
+				if (i == 9) {
+					get10thFrameScoreboard(currentPlayerFrames, display, i);
+				}
+				score +=  "		" + framescore[i];
+			}
+			display.set(display.get() + "\n" + score);
+		});	
+		
+		display.set(frame + display.get());
+		return display;
 	}
 
 }

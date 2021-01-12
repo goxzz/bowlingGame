@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
 import java.util.logging.Logger;
+import org.apache.commons.lang3.math.NumberUtils;
 
 import com.bowling.app.Constants;
 import com.bowling.interfaces.Loadable;
@@ -13,18 +14,20 @@ import com.bowling.interfaces.Player;
 
 public class GameLoader implements Loadable{
 	
+	@SuppressWarnings("unused")
 	private static Logger log = Logger.getLogger("com.bowling.game.PlayerLoader");
 	
 	public Map<String,Player> loadPlayersData(final String path) throws FileNotFoundException {
 		
 		File input;
 		
-		if(path.isBlank()) {
+		if(path.isEmpty()) {
 			input = new File("/Volumes/Workspace/Projects/bowling.txt");
 		} else {
 			input = new File(path);
 		}
 		
+		String nextLine = "";
 		int readedLine = 0;
 		String lineData[];
 		String nextPlayerName = "";
@@ -34,20 +37,24 @@ public class GameLoader implements Loadable{
 		
 		try (Scanner sc = new Scanner(input);) {
 			
-			System.out.println("Loading game...");
+			System.out.println("Loading game...\n");
 			
 			while(sc.hasNextLine()) {
 				readedLine++;
-				lineData = sc.nextLine().split("\\s+");
+				nextLine = sc.nextLine();
 				
-				if(lineData.length == 0) {
-					System.out.println("The current line is empty");
-				} else if(lineData.length > 2) {
+				if(nextLine.trim().isEmpty()) {
+					continue;
+				}
+				
+				lineData = nextLine.split("\\s+");
+				
+				if(lineData.length > 2) {
 					System.out.println("The frame has more than the two admited values");
 				}
 				
-				nextPlayerName = parsePlayerName(lineData[0]);
-				nextPlayerScore = parsePlayerScore(lineData[1]);
+				nextPlayerName = parsePlayerName(lineData[0], readedLine);
+				nextPlayerScore = parsePlayerScore(lineData[1], readedLine);
 				
 				validatePlayerTurnIsLoaded(currentPlayer, nextPlayerName, readedLine);
 				
@@ -67,17 +74,17 @@ public class GameLoader implements Loadable{
 			}
 			
 			return playersMap;
-			
 		}
 		
 	}
 	
-	public String parsePlayerName(final String playerName) {
+	public String parsePlayerName(final String playerName, final int readedLine) {
 		
 		String name = "";
 		
-		if (playerName.isBlank()) {
-			System.out.println("The player name cannot be empty");
+		if (playerName.isEmpty()) {
+			throw new IllegalArgumentException(
+					"The player name at line " + readedLine + " cannot be empty");
 		} else {
 			name = playerName.substring(0, 1).toUpperCase() + playerName.substring(1).toLowerCase();
 		}
@@ -85,29 +92,24 @@ public class GameLoader implements Loadable{
 		return name;
 	}
 	
-	public int parsePlayerScore(final String score) {
+	public int parsePlayerScore(final String score, final int readedline) {
 		
-		if(score.isBlank()) {
-			System.out.println("The score name cannot be empty");
-			return 0;
+		if(score.isEmpty()) {
+			throw new IllegalArgumentException(
+					"The player score at line " + readedline + " cannot be empty");
 		}
 		
 		if (Constants.FOUL_POINT.equals(score)) {
 			return 0;
-		} else {
-			try {
-				int frameScore = Integer.parseInt(score);
-				if(frameScore >= 0 && frameScore <= 10) {
-					return frameScore;
-				}
-			} catch (NumberFormatException e) {
-				return 0;
+		} else if (NumberUtils.isDigits(score)){
+			int frameScore = Integer.parseInt(score);
+			if(frameScore >= 0 && frameScore <= 10) {
+				return frameScore;
 			}
-		}
+		} 
 		
-		System.out.println("The score is not a valid value!");
-		
-		return 0;
+		throw new NumberFormatException(
+				score + " at line " + readedline + " is not a valid score");
 	}
 	
 	public void validatePlayerTurnIsLoaded(final Player currentPlayer

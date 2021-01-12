@@ -2,15 +2,14 @@ package com.bowling.interfaces;
 
 import java.io.FileNotFoundException;
 import java.util.Map;
-import com.bowling.game.BowlingPlayer;
 
 public interface Loadable {
 
 	public Map<String,Player> loadPlayersData(final String path) throws FileNotFoundException;
 	
-	public String parsePlayerName(final String playerName);
+	public String parsePlayerName(final String playerName, int readedline);
 	
-	public int parsePlayerScore(final String score);
+	public int parsePlayerScore(final String score, int readedline);
 	
 	public void validatePlayerTurnIsLoaded(final Player currentPlayer
 			, final String nextPlayerName
