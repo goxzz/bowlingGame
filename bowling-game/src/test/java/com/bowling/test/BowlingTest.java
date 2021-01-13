@@ -20,6 +20,9 @@ import com.bowling.interfaces.Loadable;
 import com.bowling.interfaces.Playable;
 import com.bowling.interfaces.Player;
 
+/**
+ * The Class BowlingTest.
+ */
 public class BowlingTest {
 	
 	@Test
