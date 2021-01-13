@@ -1,5 +1,8 @@
-package com.bowling.game;
+package com.bowling.exception;
 
+/**
+ * The Class ScoreLimitReachedException.
+ */
 public class ScoreLimitReachedException extends RuntimeException {
 
 	private static final long serialVersionUID = 1L;

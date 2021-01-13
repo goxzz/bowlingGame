@@ -1,5 +1,8 @@
 package com.bowling.interfaces;
 
+/**
+ * The Interface Player.
+ */
 public interface Player {
 
 	public String getName();

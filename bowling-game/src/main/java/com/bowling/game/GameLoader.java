@@ -12,20 +12,41 @@ import com.bowling.app.Constants;
 import com.bowling.exception.InvalidFileFormatException;
 import com.bowling.exception.PlayerTurnHasEndedExeption;
 import com.bowling.exception.PlayerTurnHasNotEndedExeption;
+import com.bowling.exception.ScoreLimitReachedException;
 import com.bowling.interfaces.Loadable;
 import com.bowling.interfaces.Player;
 
+/**
+ * The Class GameLoader.
+ * 
+ * Handles loading the game data into a map to be consumed
+ * by the game implementation.
+ * To ensure efficiency, updates and validates the players data
+ * before the game can start the match.
+ * 
+ */
 public class GameLoader implements Loadable{
 	
 	@SuppressWarnings("unused")
 	private static Logger log = Logger.getLogger("com.bowling.game.PlayerLoader");
 	
+	/**
+	 * Load players data.
+	 * 
+	 * Reads the input file and calls the methods that handle
+	 * validations and players updates to store all found players
+	 * in a map<String, Player>.
+	 *
+	 * @param path the path
+	 * @return the map
+	 * @throws FileNotFoundException the file not found exception
+	 */
 	public Map<String,Player> loadPlayersData(final String path) throws FileNotFoundException {
 		
 		File input;
 		
 		if(path.isEmpty()) {
-			input = new File("/Volumes/Workspace/Projects/bowling.txt");
+			input = new File("Gamedata/bowling.txt");
 		} else {
 			input = new File(path);
 		}
@@ -51,29 +72,24 @@ public class GameLoader implements Loadable{
 				}
 				
 				lineData = nextLine.split("\\s+");
-				if(lineData.length > 2) {
-					throw new InvalidFileFormatException("The frame has more than the two admited values");
+				
+				if(lineData.length != 2) {
+					throw new InvalidFileFormatException(
+							"The line " + readedLine + " has an invalid number of values");
 				}
 				
-				nextPlayerName = parsePlayerName(lineData[0], readedLine);
-				nextPlayerScore = parsePlayerScore(lineData[1], readedLine);
-				
-				validatePlayerTurnIsLoaded(currentPlayer, nextPlayerName, readedLine);
-				
-				if(playersMap.isEmpty() || !playersMap.containsKey(nextPlayerName)) {
-					currentPlayer = new BowlingPlayer(nextPlayerName);
-				} else {
-					currentPlayer = playersMap.get(nextPlayerName);
-					if(currentPlayer.getRoundsPlayed() > 9) {
-						throw new InvalidFileFormatException(
-								"The player " + currentPlayer.getName() + " has played more than 10 rounds!");
+				for (int i = 0; i < lineData.length; i++) {
+					if (i == 0) {
+						nextPlayerName = parsePlayerName(lineData[0], readedLine);
+					} else if (i == 1) {
+						nextPlayerScore = parsePlayerScore(lineData[1], readedLine);
 					}
-				}
+				} 
 				
+				validatePlayerTurnIsLoaded(currentPlayer, nextPlayerName, readedLine);	
+				currentPlayer = setPlayer(playersMap, nextPlayerName);		
 				updatePlayerInfo(currentPlayer, nextPlayerScore, readedLine);
-				
 				playersMap.put(nextPlayerName, currentPlayer);
-				
 			}
 			
 			return playersMap;
@@ -81,20 +97,61 @@ public class GameLoader implements Loadable{
 		
 	}
 	
+	/**
+	 * Sets the player.
+	 *
+	 * @param playersMap the players map
+	 * @param nextPlayerName the next player name
+	 * @return the player
+	 */
+	public Player setPlayer(Map<String, Player> playersMap, final String nextPlayerName) {
+		if(playersMap.isEmpty() || !playersMap.containsKey(nextPlayerName)) {
+			return new BowlingPlayer(nextPlayerName);
+		} else {
+			Player currentPlayer = playersMap.get(nextPlayerName);
+			if(currentPlayer.getRoundsPlayed() > 9) {
+				throw new InvalidFileFormatException(
+						"The player " + currentPlayer.getName() + " has played more than 10 rounds!");
+			}
+			
+			return currentPlayer;
+		}
+	}
+	
+	/**
+	 * Parses the player name.
+	 * 
+	 * Checks the name is not empty
+	 * and is a valid word and returns
+	 * it's parsed value.
+	 *
+	 * @param playerName the player name
+	 * @param readedLine the readed line
+	 * @return the string
+	 */
 	public String parsePlayerName(final String playerName, final int readedLine) {
-		
-		String name = "";
 		
 		if (playerName.trim().isEmpty()) {
 			throw new IllegalArgumentException(
 					"The player name at line " + readedLine + " cannot be empty");
-		} else {
-			name = playerName.substring(0, 1).toUpperCase() + playerName.substring(1).toLowerCase();
+		} else if (playerName.matches("[a-zA-Z]+")){
+			return playerName.substring(0, 1).toUpperCase() + playerName.substring(1).toLowerCase();
 		}
 		
-		return name;
+		throw new IllegalArgumentException(
+				"The player name at line " + readedLine + " is invalid!");
 	}
 	
+	/**
+	 * Parses the player score.
+	 * 
+	 * Checks the score is a valid 
+	 * and returns it's parsed value.
+	 *
+	 * @param score the score
+	 * @param readedLine the readed line
+	 * @return the int
+	 */
 	public int parsePlayerScore(final String score, final int readedLine) {
 
 		if(score.trim().isEmpty()) {
@@ -113,6 +170,17 @@ public class GameLoader implements Loadable{
 				score + " at line " + readedLine + " is not a valid score");
 	}
 	
+	/**
+	 * Validate player turn is loaded.
+	 * 
+	 * Checks if the player turn has already finished
+	 * or if a new player comes and the previous one 
+	 * hasn't finished his turn.
+	 *
+	 * @param currentPlayer the current player
+	 * @param nextPlayerName the next player name
+	 * @param readedLine the readed line
+	 */
 	public void validatePlayerTurnIsLoaded(final Player currentPlayer
 			, final String nextPlayerName
 			, final int readedLine) {
@@ -130,6 +198,17 @@ public class GameLoader implements Loadable{
 		}
 	}
 	
+	/**
+	 * Update player info.
+	 * 
+	 * Updates the player score, rounds, remaining shots
+	 * and does a general values cleanup and reset after
+	 * every round.
+	 *
+	 * @param currentPlayer the current player
+	 * @param nextPlayerScore the next player score
+	 * @param readedLine the readed line
+	 */
 	public void updatePlayerInfo(Player currentPlayer, final int nextPlayerScore, final int readedLine) {
 		
 		if(currentPlayer.getTryNumber() > 0) {
@@ -169,6 +248,13 @@ public class GameLoader implements Loadable{
 		}
 	}
 	
+	/**
+	 * Check score is valid.
+	 *
+	 * @param currentPlayer the current player
+	 * @param nextPlayerScore the next player score
+	 * @param readedLine the readed line
+	 */
 	public void checkScoreIsValid(final Player currentPlayer, final int nextPlayerScore, final int readedLine) {
 		int tryNumber = currentPlayer.getTryNumber();
 		int roundNumber = currentPlayer.getRoundsPlayed();

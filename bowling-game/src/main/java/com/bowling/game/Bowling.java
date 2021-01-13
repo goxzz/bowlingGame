@@ -11,11 +11,24 @@ import com.bowling.interfaces.Loadable;
 import com.bowling.interfaces.Playable;
 import com.bowling.interfaces.Player;
 
+/**
+ * The Class Bowling.
+ * 
+ * Implements the game logic.
+ */
 public class Bowling implements Playable {
 	
 	@SuppressWarnings("unused")
 	private static Logger log = Logger.getLogger("com.bowling.game.Bowling");
 	
+	/**
+	 * Start match.
+	 * 
+	 * Gives the welcome message, tries to load the game data
+	 * and coordinates the beginning of the other game functions.
+	 *
+	 * @throws Exception the exception
+	 */
 	public void startMatch() throws Exception {
 		System.out.println("Welcome to the bowling game!");
 		System.out.println("             .-.\n" + 
@@ -41,6 +54,13 @@ public class Bowling implements Playable {
 		}
 	}
 
+	/**
+	 * Calculate score.
+	 * 
+	 * Calculates the score obtained for every player.
+	 *
+	 * @param playersMap the players map
+	 */
 	public void calculateScore(Map<String, Player> playersMap) {
 		Player currentPlayer;
 		Integer[][] currentFrame;
@@ -63,14 +83,30 @@ public class Bowling implements Playable {
 		}
 	}
 
+	/**
+	 * Show results.
+	 *
+	 * @param playersMap the players map
+	 */
 	public void showResults(Map<String, Player> playersMap) {
-		System.out.println(generateScoreboard(playersMap));
+		System.out.println(generateScoreboard(playersMap).get());
 	}
 
+	/**
+	 * End match.
+	 */
 	public void endMatch() {
 		System.out.println("\nThanks for playing!");
 	}
 	
+	/**
+	 * Gets the first frames score.
+	 *
+	 * @param currentPlayer the current player
+	 * @param currentFrame the current frame
+	 * @param i the i
+	 * @return the first frames score
+	 */
 	public int getFirstFramesScore(final Player currentPlayer
 			, final Integer[][] currentFrame, final int i) {
 		
@@ -91,6 +127,12 @@ public class Bowling implements Playable {
 		}
 	}
 	
+	/**
+	 * Gets the 10 th frame score.
+	 *
+	 * @param currentFrame the current frame
+	 * @return the 10 th frame score
+	 */
 	public int get10thFrameScore(final Integer[][] currentFrame) {
 		
 		if(currentFrame[9][0] == 10 && currentFrame[9][2] != null) {
@@ -102,6 +144,14 @@ public class Bowling implements Playable {
 		}
 	}
 	
+	/**
+	 * Gets the first frames scoreboard.
+	 *
+	 * @param currentPlayerFrames the current player frames
+	 * @param i the i
+	 * @param display the display
+	 * @return the first frames scoreboard
+	 */
 	public void getFirstFramesScoreboard(final Integer[][] currentPlayerFrames
 			, final int i, AtomicReference<String> display) {
 		
@@ -123,6 +173,14 @@ public class Bowling implements Playable {
 		
 	}
 	
+	/**
+	 * Gets the 10 th frame scoreboard.
+	 *
+	 * @param currentPlayerFrames the current player frames
+	 * @param display the display
+	 * @param i the i
+	 * @return the 10 th frame scoreboard
+	 */
 	public void get10thFrameScoreboard(final Integer[][] currentPlayerFrames
 			, AtomicReference<String> display, int i) {
 		
@@ -140,8 +198,13 @@ public class Bowling implements Playable {
 		}
 	}
 	
+	/**
+	 * Check if all players finished.
+	 *
+	 * @param playersSet the players set
+	 * @return the boolean
+	 */
 	public Boolean checkIfAllPlayersFinished(Collection<Player> playersSet) {
-		
 		
 		if (playersSet.stream().filter(p -> p.getRoundsPlayed() < 9 
 				|| p.getIsActive()).count() == 0) {
@@ -150,6 +213,12 @@ public class Bowling implements Playable {
 		throw new PlayerTurnHasNotEndedExeption("All the players need to finish the match!");
 	}
 
+	/**
+	 * Generate scoreboard.
+	 *
+	 * @param playersMap the players map
+	 * @return the atomic reference
+	 */
 	public AtomicReference<String> generateScoreboard(Map<String, Player> playersMap) {
 		
 		AtomicReference<String> display = new AtomicReference<>("");

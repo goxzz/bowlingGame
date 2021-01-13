@@ -3,6 +3,9 @@ package com.bowling.game;
 import com.bowling.interfaces.Player;
 import com.bowling.interfaces.Scoreable;
 
+/**
+ * The Class BowlingPlayer.
+ */
 public class BowlingPlayer implements Player{
 	
 	private String name;
@@ -13,6 +16,11 @@ public class BowlingPlayer implements Player{
 	private int roundsPlayed;
 	private Boolean isActive;
 	
+	/**
+	 * Instantiates a new bowling player.
+	 *
+	 * @param name the name
+	 */
 	public BowlingPlayer(final String name) {
 		this.name = name;
 		this.scoreboard = new Scoreboard();

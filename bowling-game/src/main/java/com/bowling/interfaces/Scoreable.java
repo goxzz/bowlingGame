@@ -1,5 +1,8 @@
 package com.bowling.interfaces;
 
+/**
+ * The Interface Scoreable.
+ */
 public interface Scoreable {
 
 	public Integer[][] getFrame();

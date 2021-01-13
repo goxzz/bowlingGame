@@ -4,6 +4,9 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
+/**
+ * The Interface Playable.
+ */
 public interface Playable {
 	
 	public void startMatch() throws Exception;

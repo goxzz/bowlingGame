@@ -9,7 +9,7 @@ public class Application {
 		
 		PlayableFactory pf = new PlayableFactory();
 		try {
-			Playable bowling = pf.getGame("Bowling");
+			Playable bowling = pf.getGame(Constants.BOWLING_GAME);
 			bowling.startMatch();
 		} catch (Exception e) {
 			System.out.println(e.getMessage());
