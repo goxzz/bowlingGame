@@ -15,9 +15,6 @@ import com.bowling.game.GameLoader;
 import com.bowling.interfaces.Loadable;
 import com.bowling.interfaces.Player;
 
-/**
- * The Class GameLoaderTest.
- */
 public class GameLoaderTest { 
 	
 	@Test
